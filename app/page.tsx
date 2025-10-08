@@ -1,4 +1,3 @@
-//app/page.tsx
 "use client";
 import NumberField from "../components/NumberField";
 import Select from "../components/Select";
@@ -28,7 +27,6 @@ export default function Page() {
   // keep the two fields in sync if user flips modes
   const syncValue = (pct: number, targetMode: "markup"|"margin") => {
     if (targetMode === "markup" && mode === "margin") {
-      // user typed margin but wants markup displayed
       return marginPctToMarkupPct(pct);
     }
     if (targetMode === "margin" && mode === "markup") {
@@ -37,21 +35,40 @@ export default function Page() {
     return pct;
   };
 
-  const input: Input = {
-    kind, currency, vatRatePct, includeVatInPrice,
-    variableCostPerUnit, fixedCostsPerMonth, unitsPerMonth,
-    mode, valuePct, growthRatePct: growthRatePct
-  };
-
   const { core, proj, error } = useMemo(() => {
     try {
+      const input: Input = {
+        kind,
+        currency,
+        vatRatePct,
+        includeVatInPrice,
+        variableCostPerUnit,
+        fixedCostsPerMonth,
+        unitsPerMonth,
+        mode,
+        valuePct,
+        growthRatePct: growthRatePct
+      };
+
       const core = computeCore(input);
       const proj = project12Months(input, core);
-      return { core, proj, error: null as string|null };
-    } catch (e: any) {
-      return { core: null, proj: null, error: e.message as string };
+      return { core, proj, error: null as string | null };
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Unknown error";
+      return { core: null, proj: null, error: message };
     }
-  }, [input]);
+  }, [
+    kind,
+    currency,
+    vatRatePct,
+    includeVatInPrice,
+    variableCostPerUnit,
+    fixedCostsPerMonth,
+    unitsPerMonth,
+    mode,
+    valuePct,
+    growthRatePct
+  ]);
 
   return (
     <div className="space-y-6">
@@ -61,7 +78,7 @@ export default function Page() {
           <Select
             label="Business Type"
             value={kind}
-            onChange={(v)=>setKind(v as any)}
+            onChange={(v) => setKind(v === "goods" ? "goods" : "services")}
             options={[
               { label: "Goods (products)", value: "goods" },
               { label: "Services", value: "services" }
@@ -72,7 +89,11 @@ export default function Page() {
             label="Currency"
             value={currency}
             onChange={setCurrency}
-            options={[{label:"South African Rand (ZAR)", value:"ZAR"},{label:"US Dollar (USD)",value:"USD"},{label:"Euro (EUR)",value:"EUR"}]}
+            options={[
+              { label: "South African Rand (ZAR)", value: "ZAR" },
+              { label: "US Dollar (USD)", value: "USD" },
+              { label: "Euro (EUR)", value: "EUR" }
+            ]}
             help="Used for formatting values."
           />
           <NumberField
@@ -85,7 +106,11 @@ export default function Page() {
             help="SA default is 15%."
           />
           <label className="toggle">
-            <input type="checkbox" checked={includeVatInPrice} onChange={(e)=>setIncludeVatInPrice(e.target.checked)} />
+            <input
+              type="checkbox"
+              checked={includeVatInPrice}
+              onChange={(e) => setIncludeVatInPrice(e.target.checked)}
+            />
             Include VAT in displayed selling price
           </label>
         </div>
@@ -127,19 +152,23 @@ export default function Page() {
           <div className="space-y-2">
             <div className="flex gap-3">
               <button
-                className={clsx("btn", mode==="markup" && "bg-indigo-700")}
-                onClick={()=>{
-                  setValuePct(syncValue(valuePct,"markup"));
+                className={clsx("btn", mode === "markup" && "bg-indigo-700")}
+                onClick={() => {
+                  setValuePct(syncValue(valuePct, "markup"));
                   setMode("markup");
                 }}
-              >Markup %</button>
+              >
+                Markup %
+              </button>
               <button
-                className={clsx("btn", mode==="margin" && "bg-indigo-700")}
-                onClick={()=>{
-                  setValuePct(syncValue(valuePct,"margin"));
+                className={clsx("btn", mode === "margin" && "bg-indigo-700")}
+                onClick={() => {
+                  setValuePct(syncValue(valuePct, "margin"));
                   setMode("margin");
                 }}
-              >Margin %</button>
+              >
+                Margin %
+              </button>
             </div>
             <NumberField
               label={mode === "markup" ? "Markup %" : "Margin %"}
@@ -148,16 +177,16 @@ export default function Page() {
               min={0}
               step={0.1}
               suffix="%"
-              help={mode === "markup"
-                ? "Markup = (Price − Cost) / Cost"
-                : "Margin = (Price − Cost) / Price"}
+              help={
+                mode === "markup"
+                  ? "Markup = (Price − Cost) / Cost"
+                  : "Margin = (Price − Cost) / Price"
+              }
             />
           </div>
         </div>
 
-        {error && (
-          <div className="text-sm text-red-600">Error: {error}</div>
-        )}
+        {error && <div className="text-sm text-red-600">Error: {error}</div>}
       </div>
 
       {core && proj && <Results core={core} proj={proj} currency={currency} />}
