@@ -20,7 +20,7 @@ export default function RootLayout({
             <h1 className="text-2xl font-semibold">
               Markup & Margin Feasibility
             </h1>
-
+            <a className="text-sm underline text-indigo-600" href="/advanced">Advanced</a>
           </header>
           {children}
           <footer className="text-xs text-gray-500 py-8">
