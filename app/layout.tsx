@@ -20,14 +20,7 @@ export default function RootLayout({
             <h1 className="text-2xl font-semibold">
               Markup & Margin Feasibility
             </h1>
-            <a
-              className="text-sm underline text-indigo-600 hover:text-indigo-700"
-              href="https://vercel.com"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Deploy on Vercel
-            </a>
+
           </header>
           {children}
           <footer className="text-xs text-gray-500 py-8">
