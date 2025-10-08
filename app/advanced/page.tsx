@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import NumberField from "../../components/NumberField";//../components/NumberField
-import Select from "../../components/Select";//../components/Select
+import NumberField from "../../components/NumberField";
+import Select from "../../components/Select";
 import {
   formatCurrency,
-  priceFromMargin, priceFromMarkup, costFromMargin,
+  priceFromMargin, costFromMargin,
   marginPctFrom, markupPctFrom,
   applyDiscount, marginAfterDiscount, breakevenDiscountPct,
   netAfterFees, marginAfterFees,
@@ -13,7 +13,6 @@ import {
   breakevenHourlyRate,
   eoq, reorderPoint,
   ltvSimple, cacPaybackMonths,
-  weightedBreakevenUnits,
   revenueMaxPriceLinear,
 } from "../../lib/calculations";
 import clsx from "clsx";
@@ -76,7 +75,7 @@ export default function AdvancedPage() {
             {active === "Fees" && <FeesPanel currency={currency} />}
             {active === "Imports" && <ImportsPanel currency={currency} />}
             {active === "Services" && <ServicesPanel currency={currency} />}
-            {active === "Inventory" && <InventoryPanel currency={currency} />}
+            {active === "Inventory" && <InventoryPanel />}
             {active === "Subscription" && <SubscriptionPanel currency={currency} />}
           </div>
         )}
@@ -94,22 +93,21 @@ function PricingPanel({ currency }: { currency: string }) {
   const [markupPct, setMarkup] = useState(0);
 
   const out = useMemo(() => {
-    let p = priceExcl, c = costExcl, m = marginPct, k = markupPct;
+    let p = priceExcl, c = costExcl, m = marginPct;
 
     try {
       if (solveFor === "price") p = priceFromMargin(c, m);
       if (solveFor === "margin") m = marginPctFrom(p, c);
-      if (solveFor === "markup") k = markupPctFrom(p, c);
+      // if solveFor === "markup", we'll just compute markup below for display
       if (solveFor === "cost") c = costFromMargin(p, m);
     } catch {
       // keep defaults on invalid ranges
     }
 
-    // Always compute the two perspectives for display:
     const margin = marginPctFrom(p, c);
     const markup = markupPctFrom(p, c);
     return { p, c, margin, markup };
-  }, [solveFor, priceExcl, costExcl, marginPct, markupPct]);
+  }, [solveFor, priceExcl, costExcl, marginPct]);
 
   return (
     <div className="grid2">
@@ -117,7 +115,9 @@ function PricingPanel({ currency }: { currency: string }) {
         <Select
           label="Solve for"
           value={solveFor}
-          onChange={(v) => setSolveFor(v as any)}
+          onChange={(v) =>
+            setSolveFor(v as "price" | "margin" | "markup" | "cost")
+          }
           options={[
             { label: "Price", value: "price" },
             { label: "Margin %", value: "margin" },
@@ -275,7 +275,7 @@ function ServicesPanel({ currency }: { currency: string }) {
 }
 
 /* -------------------- INVENTORY -------------------- */
-function InventoryPanel({ currency }: { currency: string }) {
+function InventoryPanel() {
   const [annualDemand, setD] = useState(24000);
   const [orderCost, setS] = useState(500);
   const [holdingCost, setH] = useState(12);
