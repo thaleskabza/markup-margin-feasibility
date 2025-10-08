@@ -1,6 +1,15 @@
-// components/Results.tsx
 "use client";
 import { Core, Projection, formatCurrency } from "../lib/calculations";
+import Tooltip from "./Tooltip";
+
+function HLabel({ text, tip }: { text: string; tip: string }) {
+  return (
+    <span className="inline-flex items-center gap-1">
+      {text}
+      <Tooltip text={tip} />
+    </span>
+  );
+}
 
 export default function Results({
   core, proj, currency
@@ -10,26 +19,26 @@ export default function Results({
       <h2 className="text-xl font-semibold">Results</h2>
       <div className="grid2">
         <div>
-          <h3 className="font-medium mb-2">Unit Economics (excl. VAT unless noted)</h3>
+          <h3 className="font-medium mb-2">Unit Economics <span className="text-xs text-gray-500">(excl. VAT unless noted)</span></h3>
           <ul className="space-y-1 text-sm">
-            <li>Cost per unit: <b>{formatCurrency(core.costExcl, currency)}</b></li>
-            <li>Price (excl): <b>{formatCurrency(core.priceExcl, currency)}</b></li>
-            <li>VAT per unit: <b>{formatCurrency(core.vatAmountPerUnit, currency)}</b></li>
-            <li>Price {`(${currency})`} {`incl VAT if selected`}: <b>{formatCurrency(core.priceIncl, currency)}</b></li>
-            <li>Markup: <b>{core.markupPct.toFixed(2)}%</b></li>
-            <li>Margin: <b>{core.marginPct.toFixed(2)}%</b></li>
-            <li>Unit Profit (excl): <b>{formatCurrency(core.unitProfitExcl, currency)}</b></li>
-            <li>Breakeven units / month: <b>{core.breakevenUnits ? core.breakevenUnits.toFixed(2) : "N/A (non-viable)"}</b></li>
+            <li><HLabel text="Cost per unit" tip="Direct unit cost to produce/fulfil—exclude VAT. Includes materials, direct labour, packaging, etc." />: <b>{formatCurrency(core.costExcl, currency)}</b></li>
+            <li><HLabel text="Price (excl.)" tip="Selling price before VAT. Calculated from your chosen markup or margin." />: <b>{formatCurrency(core.priceExcl, currency)}</b></li>
+            <li><HLabel text="VAT per unit" tip="VAT added to the selling price (if applicable). Shown for transparency." />: <b>{formatCurrency(core.vatAmountPerUnit, currency)}</b></li>
+            <li><HLabel text="Price (incl. VAT)" tip="Displayed price if you choose to include VAT in customer-facing price." />: <b>{formatCurrency(core.priceIncl, currency)}</b></li>
+            <li><HLabel text="Markup %" tip="(Price − Cost) ÷ Cost × 100. Markup expresses profit as a % of cost." />: <b>{core.markupPct.toFixed(2)}%</b></li>
+            <li><HLabel text="Margin %" tip="(Price − Cost) ÷ Price × 100. Margin expresses profit as a % of selling price." />: <b>{core.marginPct.toFixed(2)}%</b></li>
+            <li><HLabel text="Unit Profit (excl.)" tip="Price (excl. VAT) minus Cost (excl. VAT). VAT is a pass-through tax, so keep it out of profit." />: <b>{formatCurrency(core.unitProfitExcl, currency)}</b></li>
+            <li><HLabel text="Breakeven units / month" tip="Fixed costs ÷ Unit contribution. Units needed each month to cover overheads." />: <b>{core.breakevenUnits ? core.breakevenUnits.toFixed(2) : "N/A (non-viable)"}</b></li>
           </ul>
         </div>
         <div>
-          <h3 className="font-medium mb-2">12-Month Totals (excl. VAT)</h3>
+          <h3 className="font-medium mb-2">12-Month Totals <span className="text-xs text-gray-500">(excl. VAT)</span></h3>
           <ul className="space-y-1 text-sm">
-            <li>Revenue: <b>{formatCurrency(proj.totals.revenueExcl, currency)}</b></li>
-            <li>Variable Cost: <b>{formatCurrency(proj.totals.variableCost, currency)}</b></li>
-            <li>Gross Profit: <b>{formatCurrency(proj.totals.grossProfit, currency)}</b></li>
-            <li>Fixed Costs: <b>{formatCurrency(proj.totals.fixedCosts, currency)}</b></li>
-            <li>Operating Profit: <b>{formatCurrency(proj.totals.operatingProfit, currency)}</b></li>
+            <li><HLabel text="Revenue" tip="Sum of monthly price (excl. VAT) × units sold." />: <b>{formatCurrency(proj.totals.revenueExcl, currency)}</b></li>
+            <li><HLabel text="Variable Cost" tip="Sum of monthly unit cost × units sold." />: <b>{formatCurrency(proj.totals.variableCost, currency)}</b></li>
+            <li><HLabel text="Gross Profit" tip="Revenue − Variable Costs." />: <b>{formatCurrency(proj.totals.grossProfit, currency)}</b></li>
+            <li><HLabel text="Fixed Costs" tip="Overheads such as rent, salaries, subscriptions." />: <b>{formatCurrency(proj.totals.fixedCosts, currency)}</b></li>
+            <li><HLabel text="Operating Profit" tip="Gross Profit − Fixed Costs. Before tax and interest." />: <b>{formatCurrency(proj.totals.operatingProfit, currency)}</b></li>
           </ul>
         </div>
       </div>
@@ -38,14 +47,14 @@ export default function Results({
         <table className="w-full text-sm">
           <thead>
             <tr className="text-left border-b border-gray-200 dark:border-gray-800">
-              <th className="py-2 pr-4">Month</th>
-              <th className="py-2 pr-4">Units</th>
-              <th className="py-2 pr-4">Revenue</th>
-              <th className="py-2 pr-4">Variable Cost</th>
-              <th className="py-2 pr-4">Gross Profit</th>
-              <th className="py-2 pr-4">Margin %</th>
-              <th className="py-2 pr-4">Fixed Costs</th>
-              <th className="py-2 pr-4">Operating Profit</th>
+              <th className="py-2 pr-4"><HLabel text="Month" tip="Projection period from 1 to 12." /></th>
+              <th className="py-2 pr-4"><HLabel text="Units" tip="Projected units sold this month (includes growth rate)." /></th>
+              <th className="py-2 pr-4"><HLabel text="Revenue" tip="Price (excl. VAT) × units." /></th>
+              <th className="py-2 pr-4"><HLabel text="Variable Cost" tip="Unit cost × units." /></th>
+              <th className="py-2 pr-4"><HLabel text="Gross Profit" tip="Revenue − Variable Cost." /></th>
+              <th className="py-2 pr-4"><HLabel text="Margin %" tip="Gross Profit ÷ Revenue × 100." /></th>
+              <th className="py-2 pr-4"><HLabel text="Fixed Costs" tip="Overheads assumed constant per month." /></th>
+              <th className="py-2 pr-4"><HLabel text="Operating Profit" tip="Gross Profit − Fixed Costs." /></th>
             </tr>
           </thead>
           <tbody>
@@ -66,7 +75,7 @@ export default function Results({
       </div>
 
       <p className="text-sm text-gray-500">
-        Notes: Markup = (Price − Cost) / Cost. Margin = (Price − Cost) / Price. VAT is shown separately; best practice is to price off **excl. VAT** costs and let tax flow through.
+        Notes: Markup = (Price − Cost) / Cost. Margin = (Price − Cost) / Price. VAT is shown separately; best practice is to price off <b>excl. VAT</b> costs and let tax flow through.
       </p>
     </div>
   );
